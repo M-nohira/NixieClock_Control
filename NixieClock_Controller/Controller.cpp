@@ -12,7 +12,6 @@ int main(void)
 	printf("Starting DisplayWoker Process...");
 	nixie.clockTime = clock();
 	std::thread th_display(&Nixie::DisplayWorker, &nixie);
-
 	th_logic.join();
 	th_display.join();
 
@@ -80,31 +79,33 @@ void Nixie::SetWorkerFlag(bool flag)
 /// <summary>
 /// HVの接続先の設定
 /// </summary>
-/// <param name="bcd1">GPIO-12</param>
-/// <param name="bcd2">GPIO-16</param>
-/// <param name="bcd3">GPIO-20</param>
-/// <param name="bcd4">GPIO-21</param>
-void Nixie::SetTube(int bcd1, int bcd2, int bcd3, int bcd4)
+/// <param name="bcd">0b0000[Gpio_12][Gpio_16][Gpio_20][Gpio_21]</param>
+void Nixie::SetTube(uint_fast8_t bcd)
 {
-	digitalWrite(12, bcd1);
-	digitalWrite(16, bcd2);
-	digitalWrite(20, bcd3);
-	digitalWrite(21, bcd4);
+	int gpio_tube[4] = { 12, 16, 20, 21 };
+	uint8_t diff = bcd ^ lastTubeBcd;
+	for (int cnt = 0; cnt < 4; cnt++)
+	{
+		if (!(diff >> cnt & 0b0001)) continue;
+		digitalWrite(gpio_tube[cnt], (bcd>>cnt) & 0b0001);
+	}
+	lastTubeBcd = bcd;
 }
 
 /// <summary>
 /// GNDの接続先の設定
 /// </summary>
-/// <param name="bcd1">GPIO-23</param>
-/// <param name="bcd2">GPIO-24</param>
-/// <param name="bcd3">GPIO-25</param>
-/// <param name="bcd4">GPIO-8</param>
-void Nixie::SetNum(int bcd1, int bcd2, int bcd3, int bcd4)
+/// <param name="bcd">0b0000[Gpio_23][Gpio_24][Gpio_25][Gpio_8]</param>
+void Nixie::SetNum(uint8_t bcd)
 {
-	digitalWrite(23, bcd1);
-	digitalWrite(24, bcd2);
-	digitalWrite(25, bcd3);
-	digitalWrite(8, bcd4);
+	int gpio_Num[4] = { 23,24,25,8 };
+	uint diff = bcd ^ lastNumBcd;
+	for (int cnt = 0; cnt < 4; cnt++)
+	{
+		if (!(diff >> cnt & 0b0001)) continue;
+		digitalWrite(gpio_Num[cnt], (bcd >> cnt) & 0b0001);
+	}
+	lastNumBcd = bcd;
 }
 
 /// <summary>
@@ -119,31 +120,31 @@ void Nixie::SelectShowing(int num, bool isTube)
 		switch (num)
 		{
 		case 0:
-			SetNum(0, 1, 1, 0); return;
+			SetNum(0b0110); return;
 		case 1:
-			SetNum(1, 0, 0, 1); return;
+			SetNum(0b1001); return;
 		case 2:
-			SetNum(1, 0, 0, 0); return;
+			SetNum(0b1000); return;
 		case 3:
-			SetNum(0, 1, 1, 1); return;
+			SetNum(0b0111); return;
 		case 4:
-			SetNum(0, 0, 0, 0); return;
+			SetNum(0x0); return;
 		case 5:
-			SetNum(0, 0, 0, 1); return;
+			SetNum(0x1); return;
 		case 6:
-			SetNum(0, 0, 1, 0); return;
+			SetNum(0b0010); return;
 		case 7:
-			SetNum(0, 0, 1, 1); return;
+			SetNum(0b0011); return;
 		case 8:
-			SetNum(0, 1, 0, 0); return;
+			SetNum(0b0100); return;
 		case 9:
-			SetNum(0, 1, 0, 1); return;
+			SetNum(0b0101); return;
 		case 10:
 			digitalWrite(17, 1); return;	//LDP表示　(左dot)
 		case 11:
 			digitalWrite(27, 1); return;	//RDP表示　(右dot)
 		default:
-			SetNum(1, 1, 1, 1);
+			SetNum(0xf);
 			digitalWrite(27, 0); return;
 			digitalWrite(17, 0); return;
 		}
@@ -153,25 +154,25 @@ void Nixie::SelectShowing(int num, bool isTube)
 	switch (num)
 	{
 	case 0:
-		SetTube(1, 1, 1, 1); return;
+		SetTube(0xf); return;
 	case 1:
-		SetTube(0, 0, 1, 1); return;
+		SetTube(0b0011); return;
 	case 2:
-		SetTube(0, 0, 0, 1); return;
+		SetTube(0b0001); return;
 	case 3:
-		SetTube(0, 0, 1, 0); return;
+		SetTube(0b0010); return;
 	case 4:
-		SetTube(0, 0, 0, 0); return;
+		SetTube(0x0); return;
 	case 5:
-		SetTube(0, 1, 1, 1); return;
+		SetTube(0b0111); return;
 	case 6:
-		SetTube(0, 1, 0, 1); return;
+		SetTube(0b0101); return;
 	case 7:
-		SetTube(0, 1, 1, 0); return;
+		SetTube(0b0110); return;
 	case 8:
-		SetTube(0, 1, 0, 0); return;
+		SetTube(0b0100); return;
 	default:
-		SetTube(1, 1, 1, 1);
+		SetTube(0xf);
 	}
 	return;
 }

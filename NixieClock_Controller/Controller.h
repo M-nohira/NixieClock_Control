@@ -5,6 +5,7 @@
 #include <string.h>
 #include <time.h>
 
+
 #define NIXIE_ON_TIME   950
 #define NIXIE_OFF_TIME  250
 
@@ -29,11 +30,11 @@ private:
 	int suborder[2][8];
 	std::mutex mutex;
 	bool workerEnableFlag = false;
+	uint8_t lastTubeBcd = 0;
+	uint8_t lastNumBcd = 0;
 
-	
-
-	void SetTube(int bcd1, int bcd2, int bcd3, int bcd4);
-	void SetNum(int bcd1, int bcd2, int bcd3, int bcd4);
+	void SetTube(uint_fast8_t bcd);
+	void SetNum(uint8_t bcd);
 	void SelectShowing(int num,bool isTube);
 };
 
