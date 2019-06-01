@@ -3,7 +3,9 @@
 ##
 ## Get latest from https://github.com/github/gitignore/blob/master/VisualStudio.gitignore
 
-/readme
+NixieClock_Controller/readme/
+NixieClock_Controller/*.vcxproj
+
 
 # User-specific files
 *.suo
