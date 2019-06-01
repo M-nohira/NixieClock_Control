@@ -1,4 +1,5 @@
 #include "Controller.h"
+#include <wiringPi.h>
 
 int main(void)
 {
@@ -14,6 +15,9 @@ int main(void)
 	nixie.clockTime = clock();
 	std::thread th_display(&Nixie::DisplayWorker, &nixie);
 	
+	//abc
+	//abc
+
 	th_logic.join();
 	th_display.join();
 
@@ -98,27 +102,33 @@ void Nixie::SelectShowing(int num, bool isTube)
 		switch (num)
 		{
 		case 0:
-			SetTube(0, 1, 1, 0);
+			SetNum(0, 1, 1, 0); return;
 		case 1:
-			SetTube(1, 0, 0, 1);
+			SetNum(1, 0, 0, 1); return;
 		case 2:
-			SetTube(1, 0, 0, 0);
+			SetNum(1, 0, 0, 0); return;
 		case 3:
-			SetTube(0, 1, 1, 1);
+			SetNum(0, 1, 1, 1); return;
 		case 4:
-			SetTube(0, 0, 0, 0);
+			SetNum(0, 0, 0, 0); return;
 		case 5:
-			SetTube(0, 0, 0, 1);
+			SetNum(0, 0, 0, 1); return;
 		case 6:
-			SetTube(0, 0, 1, 0);
+			SetNum(0, 0, 1, 0); return;
 		case 7:
-			SetTube(0, 0, 1, 1);
+			SetNum(0, 0, 1, 1); return;
 		case 8:
-			SetTube(0, 1, 0, 0);
+			SetNum(0, 1, 0, 0); return;
 		case 9:
-			SetTube(0, 1, 0, 1);
+			SetNum(0, 1, 0, 1); return;
+		case 10:
+			digitalWrite(17, 1); return;	//LDP表示　(左dot)
+		case 11:
+			digitalWrite(27, 1); return;	//RDP表示　(右dot)
 		default:
-			SetTube(1, 1, 1, 1);
+			SetNum(1, 1, 1, 1);
+			digitalWrite(27, 0); return;
+			digitalWrite(17, 0); return;
 		}
 		return;
 	}
@@ -126,25 +136,25 @@ void Nixie::SelectShowing(int num, bool isTube)
 	switch (num)
 	{
 	case 0:
-		SetNum(1, 1, 1, 1);
+		SetTube(1, 1, 1, 1); return;
 	case 1:
-		SetNum(0, 0, 1, 1);
+		SetTube(0, 0, 1, 1); return;
 	case 2:
-		SetNum(0, 0, 0, 1);
+		SetTube(0, 0, 0, 1); return;
 	case 3:
-		SetNum(0, 0, 1, 0);
+		SetTube(0, 0, 1, 0); return;
 	case 4:
-		SetNum(0, 0, 0, 0);
+		SetTube(0, 0, 0, 0); return;
 	case 5:
-		SetNum(0, 1, 1, 1);
+		SetTube(0, 1, 1, 1); return;
 	case 6:
-		SetNum(0, 1, 0, 1);
-	case 7:
-		SetNum(0, 1, 1, 0);
+		SetTube(0, 1, 0, 1); return;
+	case 7: 
+		SetTube(0, 1, 1, 0); return;
 	case 8:
-		SetNum(0, 1, 0, 0);
+		SetTube(0, 1, 0, 0); return;
 	default:
-		SetNum(1, 1, 1, 1);
+		SetTube(1, 1, 1, 1);
 	}
 	return;
 }
