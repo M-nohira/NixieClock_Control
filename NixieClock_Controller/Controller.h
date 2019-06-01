@@ -1,4 +1,3 @@
-#pragma once
 #include <stdio.h>
 #include <mutex>
 #include <thread>
@@ -6,8 +5,8 @@
 #include <string.h>
 #include <time.h>
 
-#define NIXIE_ON_TIME   600
-#define NIXIE_OFF_TIME  400
+#define NIXIE_ON_TIME   950
+#define NIXIE_OFF_TIME  250
 
 class Nixie
 {
@@ -49,7 +48,7 @@ Nixie::Nixie()
 	pinMode(23, OUTPUT);
 	pinMode(24, OUTPUT);
 	pinMode(25, OUTPUT);
-	pinMode(8, OUTPUT);
+	pinMode(8 , OUTPUT);
 	pinMode(17, OUTPUT);
 	pinMode(27, OUTPUT);
 }

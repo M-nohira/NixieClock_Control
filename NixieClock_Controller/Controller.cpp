@@ -1,10 +1,8 @@
 #include "Controller.h"
-#include <wiringPi.h>
+
 
 int main(void)
 {
-	//Nixie nixie;
-	//nixie.StartProcess();
 	Nixie nixie;
 
 	printf("Starting LogicWoker Process...");
@@ -14,9 +12,6 @@ int main(void)
 	printf("Starting DisplayWoker Process...");
 	nixie.clockTime = clock();
 	std::thread th_display(&Nixie::DisplayWorker, &nixie);
-	
-	//abc
-	//abc
 
 	th_logic.join();
 	th_display.join();
@@ -25,19 +20,19 @@ int main(void)
 }
 
 
-
+/// <summary>
+/// 裏側のロジックプロセス
+/// </summary>
 void Nixie::LogicWorker()
 {
-	
 	do
 	{
 		time_t t_time;
 		time(&t_time);
 		tm tms;
 		tms = *localtime(&t_time);
-		int hh[8] = { tms.tm_hour / 10,tms.tm_hour % 10,tms.tm_min / 10 ,tms.tm_min % 10, tms.tm_sec / 10, tms.tm_sec % 10 };
-		//printf("%d%d:%d%d:%d%d \n\r", tms.tm_hour / 10, tms.tm_hour % 10, tms.tm_min / 10, tms.tm_min % 10, tms.tm_sec / 10, tms.tm_sec % 10);
-		
+		int hh[8] = { tms.tm_hour / 10 ,tms.tm_hour % 10 ,11 ,tms.tm_min / 10 ,tms.tm_min % 10 ,11 ,tms.tm_sec / 10 ,tms.tm_sec % 10 };
+
 		for (int cnt = 0; cnt < 8; cnt++)
 		{
 			DisplaySetting(cnt, cnt + 1, hh[cnt]);
@@ -50,9 +45,12 @@ void Nixie::LogicWorker()
 	logicState = false;
 }
 
+/// <summary>
+/// 表示用ロジックプロセス
+/// </summary>
 void Nixie::DisplayWorker()
 {
-	
+
 	do
 	{
 		if (true == mutex.try_lock())
@@ -63,7 +61,7 @@ void Nixie::DisplayWorker()
 
 		DisplayUpdate();
 
-		if(displayState == false) printf("Started!! in %d\n\r", clock() - clockTime);	//無理やり表示させるために突っ込みました
+		if (displayState == false) printf("Started!! in %d\n\r", clock() - clockTime);	//無理やり表示させるために突っ込みました
 
 		displayState = true;
 	} while (true);
@@ -73,12 +71,19 @@ void Nixie::DisplayWorker()
 /// <summary>
 /// 実行時フラグを設定
 /// </summary>
-/// <param name="flag"></param>
+/// <param name="flag">フラグ</param>
 void Nixie::SetWorkerFlag(bool flag)
 {
 	workerEnableFlag = flag;
 }
 
+/// <summary>
+/// HVの接続先の設定
+/// </summary>
+/// <param name="bcd1">GPIO-12</param>
+/// <param name="bcd2">GPIO-16</param>
+/// <param name="bcd3">GPIO-20</param>
+/// <param name="bcd4">GPIO-21</param>
 void Nixie::SetTube(int bcd1, int bcd2, int bcd3, int bcd4)
 {
 	digitalWrite(12, bcd1);
@@ -87,6 +92,13 @@ void Nixie::SetTube(int bcd1, int bcd2, int bcd3, int bcd4)
 	digitalWrite(21, bcd4);
 }
 
+/// <summary>
+/// GNDの接続先の設定
+/// </summary>
+/// <param name="bcd1">GPIO-23</param>
+/// <param name="bcd2">GPIO-24</param>
+/// <param name="bcd3">GPIO-25</param>
+/// <param name="bcd4">GPIO-8</param>
 void Nixie::SetNum(int bcd1, int bcd2, int bcd3, int bcd4)
 {
 	digitalWrite(23, bcd1);
@@ -95,6 +107,11 @@ void Nixie::SetNum(int bcd1, int bcd2, int bcd3, int bcd4)
 	digitalWrite(8, bcd4);
 }
 
+/// <summary>
+/// 表示管番号と表示数字の出力を決定する.
+/// </summary>
+/// <param name="num">表示管番号/表示数字</param>
+/// <param name="isTube">trur=表示番号|false = 表示数字</param>
 void Nixie::SelectShowing(int num, bool isTube)
 {
 	if (isTube == false)
@@ -149,7 +166,7 @@ void Nixie::SelectShowing(int num, bool isTube)
 		SetTube(0, 1, 1, 1); return;
 	case 6:
 		SetTube(0, 1, 0, 1); return;
-	case 7: 
+	case 7:
 		SetTube(0, 1, 1, 0); return;
 	case 8:
 		SetTube(0, 1, 0, 0); return;
@@ -159,6 +176,7 @@ void Nixie::SelectShowing(int num, bool isTube)
 	return;
 }
 
+
 /// <summary>
 /// 表示用注文行列をもとに表示する.
 /// </summary>
@@ -166,6 +184,7 @@ void Nixie::DisplayUpdate()
 {
 	for (int cnt = 0; cnt < 8; cnt++)
 	{
+
 		//表示するニキシー管に通電
 		SelectShowing(suborder[0][cnt], true);
 		//表示する文字をGNDの接続      
